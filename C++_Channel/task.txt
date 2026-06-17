@@ -1,0 +1,76 @@
+. 文件结构
+text
+/home/wk/C++_Channel/
+├── CMakeLists.txt
+├── README.md
+├── include/
+│   └── ring_buffer.h
+├── src/
+│   └── main.cpp
+└── tests/
+    └── test_ring_buffer.cpp
+2. CMakeLists.txt
+要求 C++17 标准
+
+链接 pthread 库
+
+生成两个可执行文件：ring_buffer_demo (从 src/main.cpp 构建) 和 ring_buffer_test (从 tests/test_ring_buffer.cpp 构建)
+
+3. ring_buffer.h
+放在 include 目录下
+
+包含三个模板类：RingBufferBase、SPSCQueue、MPMCLockedQueue
+
+RingBufferBase<T, Capacity>：
+
+Capacity 必须是 2 的幂（static_assert）
+
+成员：alignas(64) T buffer_[Capacity] 作为数据区
+
+alignas(64) std::atomic<size_t> write_idx_{0} 和 alignas(64) std::atomic<size_t> read_idx_{0} 分别对齐到不同缓存行
+
+SPSCQueue<T, Capacity> 继承 RingBufferBase<T, Capacity>，再增加：
+
+alignas(64) std::atomic<size_t> commit_idx_{0}
+
+size_t enqueue_bulk(const T* items, size_t count) 使用 CAS 预留写槽位，顺序填充后，等待并更新 commit_idx_ （用 release）
+
+size_t dequeue_bulk(T* out, size_t count) 使用 CAS 预留读槽位，拷贝数据后更新 read_idx_
+
+单元素封装 enqueue(const T&) / dequeue(T&)
+
+MPMCLockedQueue<T, Capacity> 继承 RingBufferBase<T, Capacity>，内部用 std::mutex 保护 enqueue_bulk 和 dequeue_bulk，无 commit_idx_
+
+所有原子操作使用合适的内存序：
+
+入队填充完数据后，更新 commit_idx_ 用 memory_order_release
+
+消费者读取 commit_idx_ 用 memory_order_acquire
+
+CAS 成功用 acq_rel，失败用 relaxed
+
+4. main.cpp (演示)
+演示 SPSCQueue 的单元素和批量操作
+
+演示 MPMCLockedQueue 的多线程操作
+
+输出简单性能统计（时间、吞吐量）
+
+5. test_ring_buffer.cpp (测试)
+测试 SPSCQueue：单生产者单消费者压入/弹出 100 万元素，检查正确性
+
+测试批量操作：一次入队/出队 10 个元素，检查正确性
+
+测试 MPMCLockedQueue：4 生产者 4 消费者，总计 100 万元素，检查总和等
+
+使用 <cassert> 或简单的 assert
+
+6. README.md
+项目介绍
+
+构建和运行方法
+
+核心类说明
+
+技术要点（内存屏障、缓存行填充、CAS 等）
+
