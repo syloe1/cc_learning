@@ -5,7 +5,7 @@
 ## 项目结构
 
 ```
-C++_Channel/
+ring_buffer/
 ├── CMakeLists.txt
 ├── README.md
 ├── include/
@@ -19,7 +19,7 @@ C++_Channel/
 ## 构建与运行
 
 ```bash
-cd C++_Channel
+cd ring_buffer
 mkdir build && cd build
 cmake ..
 make -j$(nproc)

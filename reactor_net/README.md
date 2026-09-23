@@ -112,7 +112,7 @@ int main() {
 ## File Structure
 
 ```
-ReactorNet/
+reactor_net/
 ├── CMakeLists.txt
 ├── README.md
 ├── include/           # Header files
