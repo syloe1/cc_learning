@@ -6,12 +6,18 @@ cmake-build-*/
 *.so
 *.dylib
 *.exe
-threadpool
-threadpool_tsan
+
+# 就地编译产生的可执行文件。
+# 必须带目录前缀、以 / 开头锚定：单独写 `pool` / `struct` 会连同同名的项目目录一起被忽略。
+/thread_pool/threadpool
+/thread_pool/threadpool_tsan
+/pool/pool
+/struct/struct
 
 # ---- 运行期产物 ----
 logs/
 *.log
+/struct/header.bin
 
 # ---- IDE / 编辑器 ----
 .idea/
