@@ -10,6 +10,7 @@ C / C++ 学习练手项目集合。每个子目录是一个独立项目，各自
 | [reactor_net/](reactor_net/) | 仿 muduo 的 Reactor 网络库 + HTTP 静态服务器 | C++17 | CMake |
 | [pool/](pool/) | 内存池（arena + free list 分配器） | C11 | gcc |
 | [struct/](struct/) | 结构体内存布局 / 512 字节文件头 | C11 | Makefile |
+| [timer/](timer/) | 有序双链表定时器（O(1) 删除，外部 tick 驱动） | C++11 | Makefile |
 
 ## 构建
 
@@ -21,7 +22,7 @@ C / C++ 学习练手项目集合。每个子目录是一个独立项目，各自
   cmake -B build && cmake --build build
   ```
 
-- thread_pool / struct（就地编译）：
+- thread_pool / struct / timer（就地编译）：
 
   ```bash
   make
