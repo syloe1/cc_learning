@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdint.h> 
+#include <stdint.h>
+#include <stddef.h> //ptrdiff_t
 struct Node {
     struct Node* next; 
 };
@@ -80,8 +81,10 @@ int main() {
     void* ptr2 = pool_alloc(my_pool);
     printf("After 2 allocs: Used %zu/%zu\n", my_pool->used_count, my_pool->total_blocks);
     printf("Ptr1 address: %p\n", ptr1); 
-    //指针差值在 64 位系统下是 long long 类型，不是 long。
-    printf("Ptr2 address: %p (Diff: %lld bytes)\n", ptr2, (uint8_t*)ptr2 - (uint8_t*)ptr1);
+    //指针相减的结果类型是 ptrdiff_t，用 %td 打印才是可移植的写法。
+    //不能写死 %lld 或 %ld：Windows(LLP64) 下 ptrdiff_t 是 long long，Linux/macOS(LP64) 下是 long，
+    //写死任意一个都会在另一个平台上产生 -Wformat 警告甚至打印错值。
+    printf("Ptr2 address: %p (Diff: %td bytes)\n", ptr2, (uint8_t*)ptr2 - (uint8_t*)ptr1);
     //pool_init里面两次malloc, 只释放my_pool，会内存泄露
     // free(my_pool->pool_start);
     // free(my_pool);
